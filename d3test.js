@@ -1,16 +1,15 @@
 var color = d3.scale.category20();
 
-var width = 700;
-var height = 700;
-var radius = Math.min(width, height) / 2;
-var donutWidth = 20;   
+var width = 750;
+var height = 750;
+var radius = Math.min(width, height) / 2 - 45;
+var donutWidth = 15;   
 
 var svg = d3.select("#container").append("svg")
             .attr("width", width)
             .attr("height", height)
-            .attr("viewBox", "0 0 " + width + " " + height)
             .append("g")
-            .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(0.80,0.80)");
+            .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
 
 // Create arc used to draw the pie chart
 var section = d3.svg.arc()
@@ -43,6 +42,55 @@ String.prototype.trimToPx = function(length)
     }
 
     return trimmed;
+}
+
+var len_normal = 30;
+// function to draw the normal line of a link's source point (for debug only)
+function normal_source(d, i) {
+    var vector = {x: d.target.x - d.source.x, y: d.target.y - d.source.y};
+    var len = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
+    var unit_vector = {x: vector.x / len, y: vector.y / len};
+    var unit_normal_vector = transform(unit_vector, -Math.PI / 2);
+    if (unit_normal_vector.x <= 0 && d.target.x < 0 && d.source.x < 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.x >= 0 && d.target.x > 0 && d.source.x > 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.y >= 0 && d.target.y > 0 && d.source.y > 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.y <= 0 && d.target.y < 0 && d.source.y < 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    var n_p0 = {x: d.source.x + len_normal * unit_normal_vector.x, y: d.source.y + len_normal * unit_normal_vector.y};
+    var n_p1 = {x: d.target.x + len_normal * unit_normal_vector.x, y: d.target.y + len_normal * unit_normal_vector.y};
+
+    return "M" + d.source.x + "," + d.source.y + "L" + n_p0.x + "," + n_p0.y;
+}
+//
+// function to draw the normal line of a link's target point (for debug only)
+function normal_target(d, i) {
+    var vector = {x: d.target.x - d.source.x, y: d.target.y - d.source.y};
+    var len = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
+    var unit_vector = {x: vector.x / len, y: vector.y / len};
+    var unit_normal_vector = transform(unit_vector, -Math.PI / 2);
+    if (unit_normal_vector.x <= 0 && d.target.x < 0 && d.source.x < 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.x >= 0 && d.target.x > 0 && d.source.x > 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.y >= 0 && d.target.y > 0 && d.source.y > 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    if (unit_normal_vector.y <= 0 && d.target.y < 0 && d.source.y < 0) {
+        unit_normal_vector = transform(unit_vector, Math.PI / 2);
+    }
+    var n_p0 = {x: d.source.x + len_normal * unit_normal_vector.x, y: d.source.y + len_normal * unit_normal_vector.y};
+    var n_p1 = {x: d.target.x + len_normal * unit_normal_vector.x, y: d.target.y + len_normal * unit_normal_vector.y};
+
+    return "M" + d.target.x + "," + d.target.y + "L" + n_p1.x + "," + n_p1.y;
 }
 
 function donut(dataset) {
@@ -82,88 +130,12 @@ function donut(dataset) {
         d.target = isNaN(d.target) ? d.target : dataset.nodes[d.target];
     });
 
-    //var slice = dataset.links.slice(85, 86);
-    var slice = dataset.links;
-
-    // function to draw the normal line of a link's source point (for debug only)
-    var normal_source = function(d, i) {
-        var len_normal = 20;
-        var vector = {x: d.target.x - d.source.x, y: d.target.y - d.source.y};
-        var len = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
-        var unit_vector = {x: vector.x / len, y: vector.y / len};
-        var unit_normal_vector = transform(unit_vector, -Math.PI / 2);
-        if (unit_normal_vector.x <= 0 && d.target.x < 0 && d.source.x < 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.x >= 0 && d.target.x > 0 && d.source.x > 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.y >= 0 && d.target.y > 0 && d.source.y > 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.y <= 0 && d.target.y < 0 && d.source.y < 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        var n_p0 = {x: d.source.x + len_normal * unit_normal_vector.x, y: d.source.y + len_normal * unit_normal_vector.y};
-        var n_p1 = {x: d.target.x + len_normal * unit_normal_vector.x, y: d.target.y + len_normal * unit_normal_vector.y};
-
-        return "M" + d.source.x + "," + d.source.y + "L" + n_p0.x + "," + n_p0.y;
-    };
-
-    // function to draw the normal line of a link's target point (for debug only)
-    var normal_target = function(d, i) {
-        var len_normal = 20;
-        var vector = {x: d.target.x - d.source.x, y: d.target.y - d.source.y};
-        var len = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
-        var unit_vector = {x: vector.x / len, y: vector.y / len};
-        var unit_normal_vector = transform(unit_vector, -Math.PI / 2);
-        if (unit_normal_vector.x <= 0 && d.target.x < 0 && d.source.x < 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.x >= 0 && d.target.x > 0 && d.source.x > 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.y >= 0 && d.target.y > 0 && d.source.y > 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        if (unit_normal_vector.y <= 0 && d.target.y < 0 && d.source.y < 0) {
-            unit_normal_vector = transform(unit_vector, Math.PI / 2);
-        }
-        var n_p0 = {x: d.source.x + len_normal * unit_normal_vector.x, y: d.source.y + len_normal * unit_normal_vector.y};
-        var n_p1 = {x: d.target.x + len_normal * unit_normal_vector.x, y: d.target.y + len_normal * unit_normal_vector.y};
-
-        return "M" + d.target.x + "," + d.target.y + "L" + n_p1.x + "," + n_p1.y;
-    };
-
     // draw the links
-    drawLinks(slice);
-
-    // draw the source points normal
-    svg.selectAll(".normal_source").data(slice).enter().append("path")
-        .attr("class", "link")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "2,2")
-        .attr("stroke-opacity", 0.5)
-        .attr("d", function(d) {
-            return normal_source(d);
-        });
-
-    // draw the target points normal
-    svg.selectAll(".normal_target").data(slice).enter().append("path")
-        .attr("class", "link")
-        .attr("fill", "none")
-        .attr("stroke", "crimson")
-        .attr("stroke-width", 1)
-        .attr("stroke-dasharray", "2,2")
-        .attr("stroke-opacity", 0.5)
-        .attr("d", function(d) {
-            return normal_target(d);
-        });
+    drawLinks(dataset.links, undefined, false);
 }
 
 function drawLabels(pie, dataset) {
+    var trim = 40;
     svg.selectAll(".label").data(pie(dataset.nodes)).enter().append("text")
         .attr("transform", function(d) {
             var r = radius - donutWidth;
@@ -172,8 +144,8 @@ function drawLabels(pie, dataset) {
             var label_rotation = d.data.a * 180 / Math.PI;
             if (d.data.a > Math.PI / 2 && d.data.a < 3 * Math.PI / 2) {
                 label_rotation += 180;
-                //dist_drift += d.data.name.trimToPx(donutWidth - 7).visualLength();
-                dist_drift += d.data.name.visualLength();
+                dist_drift += d.data.name.trimToPx(trim).visualLength();
+                //dist_drift += d.data.name.visualLength();
                 angle_drift = -angle_drift;
             }
             var x_drift_along_r = dist_drift * Math.cos(d.data.a);
@@ -188,10 +160,10 @@ function drawLabels(pie, dataset) {
         .attr("x", function(d) { return d.data.x; })
         .attr("y", function(d) { return d.data.y; })
         .attr("font-family", "sans-serif")
-        .attr("font-size", "8px")
+        .attr("font-size", "10px")
         .text(function(d) { 
-            //return d.data.name.trimToPx(donutWidth - 7);
-            return d.data.name;
+            return d.data.name.trimToPx(trim);
+            //return d.data.name;
         })
 }
 
@@ -206,7 +178,7 @@ function drawPieSections(pie, dataset) {
         .attr("cursor", "pointer")
         .on("click", function(d, i) {
             //console.debug(d.data.name);
-            drawLinks(dataset.links, d.data);
+            drawLinks(dataset.links, d.data, false);
         });
     return pieSections;
 }
@@ -250,15 +222,67 @@ Array.prototype.equals = function(array) {
     return true;
 }
 
-function drawLinks(data, filter) {
+function drawNormals(data, filter) {
     var filtered = data.filter(function(d) {return filterFunc(d, filter); })
-    // a link is bidirectional so a -> b is the same than b -> a
-    var links = svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; });
+    var s_normals = svg.selectAll(".normal_source").data(filtered, function(d) { return d.source.name + "_" + d.target.name; });
+    var t_normals = svg.selectAll(".normal_target").data(filtered, function(d) { return d.source.name + "_" + d.target.name; });
 
     if(filtered.equals(prevData) &&
-       svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; }).attr("stroke") != "#888888") {
-        svg.selectAll(".link").data(data)
-            .transition().duration(300).ease("exp")
+       s_normals.attr("stroke") != "#888888") {
+        s_normals
+            .attr("stroke", "#888888")
+            .attr("stroke-opacity", 0.075);
+        t_normals
+            .attr("stroke", "#888888")
+            .attr("stroke-opacity", 0.075);
+        return;
+    }
+
+    s_normals.enter().append("path")
+        .attr("class", "normal_source")
+        .attr("fill", "none")
+        .attr("stroke", "#888888")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "1,1")
+        .attr("stroke-opacity", 0.075)
+        .attr("d", normal_source);
+
+    t_normals.enter().append("path")
+        .attr("class", "normal_target")
+        .attr("fill", "none")
+        .attr("stroke", "#888888")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "1,1")
+        .attr("stroke-opacity", 0.075)
+        .attr("d", normal_target);
+
+    if (data.length > filtered.length) {
+        s_normals
+            .attr("stroke", "steelblue")
+            .attr("stroke-opacity", 0.7);
+        t_normals
+            .attr("stroke", "crimson")
+            .attr("stroke-opacity", 0.7);
+    }
+
+    s_normals.exit()
+        .attr("stroke", "#888888")
+        .attr("stroke-opacity", 0.075);
+    t_normals.exit()
+        .attr("stroke", "#888888")
+        .attr("stroke-opacity", 0.075);
+}
+
+function drawLinks(data, filter, withNormals) {
+    var filtered = data.filter(function(d) {return filterFunc(d, filter); })
+    var links = svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; });
+    if (withNormals) {
+        drawNormals(data, filter);
+    }
+
+    if(filtered.equals(prevData) &&
+       links.attr("stroke") != "#888888") {
+        links
             .attr("stroke", "#888888")
             .attr("stroke-opacity", 0.075);
         return;
@@ -270,19 +294,23 @@ function drawLinks(data, filter) {
         .attr("stroke", "#888888")
         .attr("stroke-width", 1)
         .attr("stroke-opacity", 0.075)
-        .attr("d", function(d) {
-            return bezier(d);
-        });
+        .attr("d", bezier);
 
     if (data.length > filtered.length) {
-        links.transition().duration(250).ease("exp")
+        links.attr("stroke-dasharray", function(d, i) {
+            if (d.target.name == filter.name) {
+                return "2,2";
+            }
+        });
+        links
             .attr("stroke", function(d) { return color(d.source.group); })
             .attr("stroke-opacity", 0.8);
     }
 
-    links.exit().transition().duration(300).ease("exp")
+    links.exit()
         .attr("stroke", "#888888")
         .attr("stroke-opacity", 0.075);
+
     prevData = filtered;
 }
 
@@ -290,7 +318,7 @@ function drawLinks(data, filter) {
 // It calculates the normal of the source and target point that will be used as control points of the curve
 function bezier(d) {
     // randomize the height of bezier control points to avoid overlap
-    var len_normal = 25 + 20 * Math.random();
+    var len_normal = 50 + 20 * Math.random();
     var vector = {x: d.target.x - d.source.x, y: d.target.y - d.source.y};
     var len = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
     var unit_vector = {x: vector.x / len, y: vector.y / len};
