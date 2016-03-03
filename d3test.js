@@ -255,8 +255,12 @@ function drawLinks(data, filter) {
     // a link is bidirectional so a -> b is the same than b -> a
     var links = svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; });
 
-    if(filtered.equals(prevData) && svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; }).attr("stroke") != "#888888") {
-        svg.selectAll(".link").transition().duration(300).ease("exp").attr("stroke", "#888888").attr("stroke-opacity", 0.075);
+    if(filtered.equals(prevData) &&
+       svg.selectAll(".link").data(filtered, function(d) { return d.source.name + "_" + d.target.name; }).attr("stroke") != "#888888") {
+        svg.selectAll(".link").data(data)
+            .transition().duration(300).ease("exp")
+            .attr("stroke", "#888888")
+            .attr("stroke-opacity", 0.075);
         return;
     }
 
@@ -271,15 +275,19 @@ function drawLinks(data, filter) {
         });
 
     if (data.length > filtered.length) {
-        links.transition().duration(300).ease("exp").attr("stroke", function(d) { return color(d.source.group); }).attr("stroke-opacity", 0.6);
+        links.transition().duration(250).ease("exp")
+            .attr("stroke", function(d) { return color(d.source.group); })
+            .attr("stroke-opacity", 0.8);
     }
 
-    links.exit().transition().duration(300).ease("exp").attr("stroke", "#888888").attr("stroke-opacity", 0.075);
+    links.exit().transition().duration(300).ease("exp")
+        .attr("stroke", "#888888")
+        .attr("stroke-opacity", 0.075);
     prevData = filtered;
 }
 
 // Function to draw a link as a Bezier curve
-// It calculate the normal of the source and target point that will be used as control points of the curve
+// It calculates the normal of the source and target point that will be used as control points of the curve
 function bezier(d) {
     // randomize the height of bezier control points to avoid overlap
     var len_normal = 25 + 20 * Math.random();
